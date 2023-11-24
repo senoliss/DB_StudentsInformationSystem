@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DB_StudentsInformationSystem.Migrations
 {
     [DbContext(typeof(FacultyContext))]
-    [Migration("20231124024510_initial2")]
-    partial class initial2
+    [Migration("20231124153053_initial4")]
+    partial class initial4
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,10 @@ namespace DB_StudentsInformationSystem.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FacultyId"));
+
+                    b.Property<string>("FacultyCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FacultyName")
                         .IsRequired()
@@ -97,12 +101,14 @@ namespace DB_StudentsInformationSystem.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("StudentEmail")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StudentName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StudentNumber")
+                        .HasColumnType("int");
 
                     b.Property<string>("StudentSurname")
                         .IsRequired()

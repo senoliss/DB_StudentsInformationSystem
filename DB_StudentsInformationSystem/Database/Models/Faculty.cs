@@ -7,6 +7,7 @@ namespace DB_StudentsInformationSystem.Database.Models
         [Key]                                               // Primary Key Attribute
         public int FacultyId { get; set; }                  // Primary Key Property 'Navigational property'
         public string FacultyName { get; set; }
+        public string FacultyCode { get; set; }
         //public List<Lecture> Lectures { get; set; }         // Composition to Lecture table 'Has many lectures' ????
         public List<Student> Students { get; set; }         // Composition to Student table 'Has many students'
         public List<FacultyLecture> FacultyLectures { get; set; }

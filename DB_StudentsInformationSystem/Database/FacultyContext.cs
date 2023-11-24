@@ -30,7 +30,7 @@ namespace DB_StudentsInformationSystem.Database
             // cia mes konfiguruojame sarysi su many to many
 
             modelBuilder.Entity<FacultyLecture>()
-                .HasKey(f => new { f.FacultyId, f.LectureId });        // du pirminiai raktai nurodomi skirti sujungti sarysi daug su daug
+                .HasKey(f => new { f.FacultyId, f.LectureId });        // du pirminiai raktai nurodomi skirti sujungti sarysi daug su daug tarp Lecture ir Faculty klasiu / lejnteliu
 
             modelBuilder.Entity<FacultyLecture>()
                 .HasOne(fc => fc.Faculty)

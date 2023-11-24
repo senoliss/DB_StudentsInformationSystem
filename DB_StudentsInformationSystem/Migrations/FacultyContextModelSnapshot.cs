@@ -30,6 +30,10 @@ namespace DB_StudentsInformationSystem.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FacultyId"));
 
+                    b.Property<string>("FacultyCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FacultyName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -94,12 +98,14 @@ namespace DB_StudentsInformationSystem.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("StudentEmail")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StudentName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StudentNumber")
+                        .HasColumnType("int");
 
                     b.Property<string>("StudentSurname")
                         .IsRequired()

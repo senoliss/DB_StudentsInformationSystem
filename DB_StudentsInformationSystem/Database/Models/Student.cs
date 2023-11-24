@@ -14,7 +14,9 @@ namespace DB_StudentsInformationSystem.Database.Models
         public string StudentName { get; set; }
         public string StudentSurname { get; set; }
         public string? StudentEmail { get; set; }
+        public int StudentNumber { get; set; }
         public List<Lecture> Lectures { get; set; }         // Composition to Lecture table 'Has many lectures'
         public Faculty Faculty { get; set; }                // Composition to Faculty table 'Has one faculty'
+
     }
 }
