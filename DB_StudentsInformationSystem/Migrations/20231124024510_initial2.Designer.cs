@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DB_StudentsInformationSystem.Migrations
 {
     [DbContext(typeof(FacultyContext))]
-    [Migration("20231122165151_initial_test")]
-    partial class initial_test
+    [Migration("20231124024510_initial2")]
+    partial class initial2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,6 +69,12 @@ namespace DB_StudentsInformationSystem.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("LectureTimeEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LectureTimeStart")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("StudentId")
                         .HasColumnType("int");
 
@@ -89,6 +95,10 @@ namespace DB_StudentsInformationSystem.Migrations
 
                     b.Property<int>("FacultyId")
                         .HasColumnType("int");
+
+                    b.Property<string>("StudentEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StudentName")
                         .IsRequired()

@@ -61,6 +61,42 @@ namespace DB_StudentsInformationSystem
             dbContext.FacultyLectures.Add(new FacultyLecture { Faculty = languageFaculty, Lecture = lecture7 });
 
             dbContext.SaveChanges();
+
+            StudentMethods.GetStudentInput();
+
+        }
+    }
+
+    public class FacultyMethods
+    {
+
+    }
+
+    public class LectureMethods
+    {
+
+    }
+
+    public class StudentMethods
+    {
+        public static void GetStudentInput()
+        {
+            Console.WriteLine("Iveskite studento varda: ");
+            string studentName = Console.ReadLine();
+            Console.WriteLine("Iveskite studento pavarde: ");
+            string studentSurname = Console.ReadLine();
+
+            var dbContext = new FacultyContext();
+            dbContext.Student.Add
+                (
+                    new Student
+                    {
+                        StudentName = studentName,
+                        StudentSurname = studentSurname
+                    }
+                );
+            dbContext.SaveChanges();
+
         }
     }
 }

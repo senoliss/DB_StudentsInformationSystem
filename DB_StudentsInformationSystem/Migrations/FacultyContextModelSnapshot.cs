@@ -66,6 +66,12 @@ namespace DB_StudentsInformationSystem.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("LectureTimeEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LectureTimeStart")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("StudentId")
                         .HasColumnType("int");
 
@@ -86,6 +92,10 @@ namespace DB_StudentsInformationSystem.Migrations
 
                     b.Property<int>("FacultyId")
                         .HasColumnType("int");
+
+                    b.Property<string>("StudentEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StudentName")
                         .IsRequired()
