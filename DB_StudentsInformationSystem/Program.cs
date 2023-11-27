@@ -43,6 +43,27 @@ namespace DB_StudentsInformationSystem
 
                     case "2":
                         //Add Students Or Lectures To Faculty
+                        Console.WriteLine("Select Faculty add students or lectuers to: ");
+                        FacultyMethods.Printer("2");
+                        int facultyChoice = Int32.Parse(Console.ReadLine());
+
+                        Console.WriteLine("What would you like to add to selected faculty? ");
+                        Console.WriteLine("1. Students");
+                        Console.WriteLine("2. Lectures");
+                        int addChoice = Int32.Parse(Console.ReadLine());
+                        if(addChoice == 1)
+                        {
+                            Console.WriteLine("Select students which to add to selected faculty(list separated by ','): ");
+                            FacultyMethods.Printer("6");
+                            // finished here, need to get user input and filter selected students and update their faculty with selected one. Same for Lectures.
+                        }
+                        else if(addChoice == 2)
+                        {
+                            Console.WriteLine("Select lectures which to add to selected faculty(list separated by ','): ");
+                            FacultyMethods.Printer("7");
+                        }
+                        FacultyMethods.UpdateFaculty(facultyChoice, addChoice);
+
                         break;
 
                     case "3":
@@ -50,8 +71,12 @@ namespace DB_StudentsInformationSystem
                         break;
 
                     case "4":
-                        //Create Student AndAssign To Faculty
-                        StudentMethods.CreateStudent();                              // returns student object from user input
+                        //Create Student And Assign To Faculty
+                        if (StudentMethods.CheckIfAnyFacultyExists())
+                        {
+                            StudentMethods.CreateStudent();                              // returns student object from user input
+                        }
+                        else Console.WriteLine("No faculties has been created yet! Please create a faculty and then assign students...");
                         break;
 
                     case "5":
@@ -298,6 +323,12 @@ namespace DB_StudentsInformationSystem
 
             return faculty;
         }
+
+        public static void UpdateFaculty(int facultyChosen, int whatToUpdate)
+        {
+            List<Faculty> faculties = GetFaculties();
+            Faculty facultyToUpdate = faculties[facultyChosen];
+        }
         public static bool IsFacultyInputValidated(Faculty faculty)
         {
             //Here we'll Validate info that we got from input to create Departament
@@ -357,9 +388,17 @@ namespace DB_StudentsInformationSystem
 
         }
 
+        public static List<Faculty> GetFaculties()
+        {
+            var dbContext = new FacultyContext();
+            List<Faculty> faculties;
+            return faculties = dbContext.Faculty.ToList();
+        }
+
         // Prints either lectures or students by choice to the console
         public static void Printer(string choice)
         {
+            int i = 1;
             if (!string.IsNullOrEmpty(choice))
             {
                 if (choice == "6")
@@ -373,13 +412,14 @@ namespace DB_StudentsInformationSystem
                         {
                             if (student.Faculty.FacultyId != null)
                             {
-                                Console.WriteLine($"Student: {student.StudentName} {student.StudentSurname} - {student.StudentNumber} - Faculty: {student.Faculty.FacultyId}");
+                                Console.WriteLine($"{i}. Student: {student.StudentName} {student.StudentSurname} - {student.StudentNumber} - Faculty: {student.Faculty.FacultyId}");
                             }
                             else 
                             {
                             
-                                Console.WriteLine($"Student: {student.StudentName} {student.StudentSurname} - {student.StudentNumber}");
+                                Console.WriteLine($"{i}. Student: {student.StudentName} {student.StudentSurname} - {student.StudentNumber}");
                             }
+                            i++;
                         }
                     }
                     else Console.WriteLine("There's no students currentlt in this faculty!");
@@ -392,10 +432,26 @@ namespace DB_StudentsInformationSystem
                     {
                         foreach (Lecture lecture in lectures)
                         {
-                            Console.WriteLine($"Lecture: {lecture.LectureName} - {lecture.LectureTimeStart} / {lecture.LectureTimeEnd}");
+                            Console.WriteLine($"{i}. Lecture: {lecture.LectureName} - {lecture.LectureTimeStart} / {lecture.LectureTimeEnd}");
+                            i++;
                         }
                     }
                     else Console.WriteLine("There's no students currentlt in this faculty!");
+                }
+                else if (choice == "2")
+                {
+                    List<Faculty> faculties = GetFaculties();
+
+                    if (faculties.Count > 0)
+                    {
+                        
+                        foreach (Faculty faculty in faculties)
+                        {
+                            Console.WriteLine($"{i}. Faculty: {faculty.FacultyName} - {faculty.FacultyCode}");
+                            i++;
+                        }
+                    }
+                    else Console.WriteLine("There's no faculties created at the moment");
                 }
             }
         }
@@ -413,16 +469,28 @@ namespace DB_StudentsInformationSystem
 
     public class StudentMethods
     {
-        public static void DeleteStudent()
+        public static bool CheckIfAnyFacultyExists()
+        {
+            List<Faculty> faculties = GetFaculties();
+
+            return faculties.Count > 0;
+        }
+        public static List<Faculty> GetFaculties()
         {
             var dbContext = new FacultyContext();
-            var studentToDelete = dbContext.Student.FirstOrDefault(s => s.Faculty.FacultyCode == "TEST01");
-            if (studentToDelete != null)
-            {
-                dbContext.Student.Remove(studentToDelete);
-                dbContext.SaveChanges();
-            }
+            List < Faculty> faculties;
+            return faculties = dbContext.Faculty.ToList();
         }
+        //public static void DeleteStudent()
+        //{
+        //    var dbContext = new FacultyContext();
+        //    var studentToDelete = dbContext.Student.FirstOrDefault(s => s.Faculty.FacultyCode == "TEST01");
+        //    if (studentToDelete != null)
+        //    {
+        //        dbContext.Student.Remove(studentToDelete);
+        //        dbContext.SaveChanges();
+        //    }
+        //}
         public static void CreateStudent()
         {
             // Have to have maybe two methods, one for creating students to list without faculty from opt 4, and another to directly create and assign a faculty to it.
