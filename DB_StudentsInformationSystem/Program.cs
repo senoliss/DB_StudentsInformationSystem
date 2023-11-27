@@ -1,6 +1,7 @@
 ﻿using DB_StudentsInformationSystem.Database;
 using DB_StudentsInformationSystem.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 
 namespace DB_StudentsInformationSystem
@@ -12,6 +13,8 @@ namespace DB_StudentsInformationSystem
             //var dbContext = new FacultyContext();
             //dbContext.Database.EnsureDeleted();
             //Environment.Exit(0);
+
+            //NavigateMenu();
 
             while (true)
             {
@@ -35,11 +38,7 @@ namespace DB_StudentsInformationSystem
                 {
                     case "1":
                         //Create Faculty
-                        Faculty faculty = FacultyMethods.GetFacultyInput();
-                        if (FacultyMethods.IsFacultyInputValidated(faculty))                             // returns bool if student is valid
-                        {
-                            FacultyMethods.InsertFacultyInputToDB(faculty);                              // inserts student to DB
-                        }
+                        FacultyMethods.CreateFaculty();
                         break;
 
                     case "2":
@@ -52,13 +51,7 @@ namespace DB_StudentsInformationSystem
 
                     case "4":
                         //Create Student AndAssign To Faculty
-
-                        Student studentToInput = StudentMethods.GetStudentInput();                              // returns student object from user input
-
-                        if (StudentMethods.IsStudentInputValidated(studentToInput))                             // returns bool if student is valid
-                        {
-                            StudentMethods.InsertStudentInputToDB(studentToInput);                              // inserts student to DB
-                        }
+                        StudentMethods.CreateStudent();                              // returns student object from user input
                         break;
 
                     case "5":
@@ -163,23 +156,27 @@ namespace DB_StudentsInformationSystem
             string[] menuItems = { "1. Create Faculty", "2. Assign Students And Lectures to Faculty", "3. Create Lecture",
                 "4. Create Student", "5. Reassign Student", "6. Print Students Of Faculty", "7. Print Lectures Of Faculty",
                 "8. Print Lectures Of Student", "9. Exit" };
+
             int selectedIndex = 0;
 
-            DrawMenu(menuItems, selectedIndex);
-
-            ConsoleKey key = Console.ReadKey().Key;
-
-            switch (key)
+            while (true)
             {
-                case ConsoleKey.UpArrow:
-                    selectedIndex = Math.Max(0, selectedIndex - 1);
-                    break;
-                case ConsoleKey.DownArrow:
-                    selectedIndex = Math.Min(menuItems.Length - 1, selectedIndex + 1);
-                    break;
-                case ConsoleKey.Enter:
-                    HandleMenuItemSelection(Int32.Parse(menuItems[selectedIndex].Split('.')[0]));
-                    break;
+                DrawMenu(menuItems, selectedIndex);
+
+                ConsoleKey key = Console.ReadKey().Key;
+
+                switch (key)
+                {
+                    case ConsoleKey.UpArrow:
+                        selectedIndex = Math.Max(0, selectedIndex - 1);
+                        break;
+                    case ConsoleKey.DownArrow:
+                        selectedIndex = Math.Min(menuItems.Length - 1, selectedIndex + 1);
+                        break;
+                    case ConsoleKey.Enter:
+                        HandleMenuItemSelection(Int32.Parse(menuItems[selectedIndex].Split('.')[0]));
+                        break;
+                }
             }
         }
         static void HandleMenuItemSelection(int choice)
@@ -187,14 +184,14 @@ namespace DB_StudentsInformationSystem
             Console.Clear();
             // Add logic to handle the selected menu item.
             Console.WriteLine($"Selected option: {choice}");
-            if ((MenuOptions)choice == MenuOptions.CreateFaculty) ;
+            if ((MenuOptions)choice == MenuOptions.CreateFaculty) FacultyMethods.CreateFaculty();
             if ((MenuOptions)choice == MenuOptions.AssignStudentsAndLectures) ;
-            if ((MenuOptions)choice == MenuOptions.CreateLecture) ;
-            if ((MenuOptions)choice == MenuOptions.CreateStudent) ;
+            if ((MenuOptions)choice == MenuOptions.CreateLecture) LectureMethods.CreateLecture();
+            if ((MenuOptions)choice == MenuOptions.CreateStudent) StudentMethods.CreateStudent();
             if ((MenuOptions)choice == MenuOptions.ReassignStudent) ;
-            if ((MenuOptions)choice == MenuOptions.PrintStudentsOfFaculty) ;
-            if ((MenuOptions)choice == MenuOptions.PrintLecturesOfFaculty) ;
-            if ((MenuOptions)choice == MenuOptions.PrintLecturesOfStudent) ;
+            if ((MenuOptions)choice == MenuOptions.PrintStudentsOfFaculty) FacultyMethods.GetStudents();
+            if ((MenuOptions)choice == MenuOptions.PrintLecturesOfFaculty) FacultyMethods.GetLectures();
+            if ((MenuOptions)choice == MenuOptions.PrintLecturesOfStudent) StudentMethods.GetLectures();
             if ((MenuOptions)choice == MenuOptions.Exit) Environment.Exit(0);
         }
         #endregion
@@ -259,14 +256,36 @@ namespace DB_StudentsInformationSystem
 
     public class FacultyMethods
     {
+        public static bool ConfirmCreatingFaculty(Faculty faculty)
+        {
+            Console.WriteLine("Faculty will be created with such info: ");
+            Console.WriteLine($"Faculty Name: {faculty.FacultyName}");
+            Console.WriteLine($"Faculty Code: {faculty.FacultyCode}");
+            Console.Write("Do you wish to continue? YES-[y]");
+
+            string choice = Console.ReadLine();
+
+            return choice == "y" ? true : false;
+        }
+        public static void CreateFaculty()
+        {
+            Faculty faculty = GetFacultyInput();
+            if (IsFacultyInputValidated(faculty))                             // returns bool if student is valid
+            {
+                if (ConfirmCreatingFaculty(faculty))                          // returns bool on user choice of confirming correct info
+                {
+                    InsertFacultyInputToDB(faculty);                          // inserts student to DB
+                }
+            }
+        }
         public static Faculty GetFacultyInput()
         {
             //Here we'll get info required to create Departament
             Faculty faculty = new Faculty();
 
-            Console.WriteLine("Enter the name of Faculty");
+            Console.WriteLine("Enter the name of the Faculty");
             string facName = Console.ReadLine();
-            Console.WriteLine("Enter the code of Faculty");
+            Console.WriteLine("Enter the code of the Faculty");
             string facCode = Console.ReadLine();
 
             faculty.FacultyName = facName;
@@ -288,12 +307,41 @@ namespace DB_StudentsInformationSystem
         public static int ValidateFacultyInput(Faculty faculty)
         {
             //Here we'll Validate info that we got from input to create Departament
+            // returns:
+            // 0 - everything is wrong
+            // 1 - everything is validated
+            // 2 - only Name is validated
+
+            if (faculty.FacultyName.Length >= 3
+                && faculty.FacultyName.Length <= 100)
+            {
+                if (faculty.FacultyCode.Length == 6
+                    && faculty.FacultyCode.Any(char.IsLetter)
+                    && faculty.FacultyCode.Any(char.IsDigit))
+                {
+                    return 1;
+                }
+                // blalala
+                return 2;
+            }
             return 0;
         }
 
         public static void InsertFacultyInputToDB(Faculty faculty)
         {
             //Here we'll insert the validated Departament info to DB
+            var dbContext = new FacultyContext();
+            dbContext.Faculty.Add(faculty);
+            dbContext.SaveChanges();
+        }
+
+        public static void GetLectures()
+        {
+
+        }
+        public static void GetStudents()
+        {
+
         }
 
 
@@ -301,12 +349,25 @@ namespace DB_StudentsInformationSystem
 
     public class LectureMethods
     {
+        public static void CreateLecture()
+        {
 
+        }
     }
 
     public class StudentMethods
     {
-        public static Student GetStudentInput()
+        public static void CreateStudent()
+        {
+            // Have to have maybe two methods, one for creating students to list without faculty from opt 4, and another to directly create and assign a faculty to it.
+            Student studentToInput = GetStudentInputUntilValidated();                // returns student object from user input
+
+            if (IsStudentInputValidated(studentToInput))                             // returns bool if student is valid
+            {
+                InsertStudentInputToDB(studentToInput);                              // inserts student to DB
+            }
+        }
+        public static Student GetStudentInputUntilValidated()
         {
             Student student;
             // get initial student info
@@ -384,7 +445,6 @@ namespace DB_StudentsInformationSystem
         {
             if (!(ValidateStudentInput(student) == 1))                                                         // all is ok
             {
-
                 return false;
             }
             return true;
@@ -428,5 +488,9 @@ namespace DB_StudentsInformationSystem
             dbContext.SaveChanges();
         }
 
+        public static void GetLectures()
+        {
+
+        }
     }
 }
