@@ -56,14 +56,19 @@ namespace DB_StudentsInformationSystem
 
                     case "5":
                         //Transfer Student To Another Faculty
+                        
                         break;
 
                     case "6":
                         //Display All Students Of Faculty
+                        FacultyMethods.Printer("6");
+                        Console.ReadKey();
                         break;
 
                     case "7":
                         //Display All Lectures Of Faculty
+                        FacultyMethods.Printer("7");
+                        Console.ReadKey();
                         break;
 
                     case "8":
@@ -335,13 +340,64 @@ namespace DB_StudentsInformationSystem
             dbContext.SaveChanges();
         }
 
-        public static void GetLectures()
+        // Gets all the lectures from Lecture DB Table
+        public static List<Lecture> GetLectures()
         {
+            var dbContext = new FacultyContext();
+            List<Lecture> lectures;
+            return lectures = dbContext.Lecture.ToList();
+        }
+
+        // Gets all the students from Student DB Table
+        public static List<Student> GetStudents()
+        {
+            var dbContext = new FacultyContext();
+            List<Student> students;
+            return students = dbContext.Student.ToList();
 
         }
-        public static void GetStudents()
-        {
 
+        // Prints either lectures or students by choice to the console
+        public static void Printer(string choice)
+        {
+            if (!string.IsNullOrEmpty(choice))
+            {
+                if (choice == "6")
+                {
+                    List<Student> students = GetStudents();
+
+                    if (students.Count > 0)
+                    {
+                        
+                        foreach (Student student in students)
+                        {
+                            if (student.Faculty.FacultyId != null)
+                            {
+                                Console.WriteLine($"Student: {student.StudentName} {student.StudentSurname} - {student.StudentNumber} - Faculty: {student.Faculty.FacultyId}");
+                            }
+                            else 
+                            {
+                            
+                                Console.WriteLine($"Student: {student.StudentName} {student.StudentSurname} - {student.StudentNumber}");
+                            }
+                        }
+                    }
+                    else Console.WriteLine("There's no students currentlt in this faculty!");
+                }
+                else if (choice == "7")
+                {
+                    List<Lecture> lectures = GetLectures();
+
+                    if (lectures.Count > 0)
+                    {
+                        foreach (Lecture lecture in lectures)
+                        {
+                            Console.WriteLine($"Lecture: {lecture.LectureName} - {lecture.LectureTimeStart} / {lecture.LectureTimeEnd}");
+                        }
+                    }
+                    else Console.WriteLine("There's no students currentlt in this faculty!");
+                }
+            }
         }
 
 
@@ -357,6 +413,16 @@ namespace DB_StudentsInformationSystem
 
     public class StudentMethods
     {
+        public static void DeleteStudent()
+        {
+            var dbContext = new FacultyContext();
+            var studentToDelete = dbContext.Student.FirstOrDefault(s => s.Faculty.FacultyCode == "TEST01");
+            if (studentToDelete != null)
+            {
+                dbContext.Student.Remove(studentToDelete);
+                dbContext.SaveChanges();
+            }
+        }
         public static void CreateStudent()
         {
             // Have to have maybe two methods, one for creating students to list without faculty from opt 4, and another to directly create and assign a faculty to it.
@@ -384,8 +450,8 @@ namespace DB_StudentsInformationSystem
             do
             {
 
-                var scienceFaculty = new Faculty { FacultyName = "Sciences2", FacultyCode = "TEST01" };
-                var lecture2 = new Lecture { LectureName = "Applied Physics" };
+                var scienceFaculty = new Faculty { FacultyName = "EmptyFaculty", FacultyCode = "TEST01" };
+                var lecture2 = new Lecture { LectureName = "EmptyLecture" };
                 List<Lecture> lectures2 = new List<Lecture>();
                 lectures2.Add(lecture2);
 
