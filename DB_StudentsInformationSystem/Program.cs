@@ -1,6 +1,7 @@
 ﻿using DB_StudentsInformationSystem.Database;
 using DB_StudentsInformationSystem.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 
@@ -14,6 +15,9 @@ namespace DB_StudentsInformationSystem
             //dbContext.Database.EnsureDeleted();
             //Environment.Exit(0);
 
+            PopulateDb();
+            Environment.Exit(0);
+
             //NavigateMenu();
 
             while (true)
@@ -21,15 +25,25 @@ namespace DB_StudentsInformationSystem
                 Console.Clear();
 
                 Console.WriteLine("Student Information System");
-                Console.WriteLine("1. Create a faculty and add students/lectures");
-                Console.WriteLine("2. Add students/lectures to an existing faculty");
-                Console.WriteLine("3. Create a lecture and assign it to a faculty");
-                Console.WriteLine("4. Create a student, add to a faculty, and assign lectures");
-                Console.WriteLine("5. Transfer student to another faculty");
-                Console.WriteLine("6. Display all students of the faculty");
-                Console.WriteLine("7. Display all lectures of the faculty");
-                Console.WriteLine("8. Display all lectures by student");
+                Console.WriteLine("1. Create a faculty.");
+                Console.WriteLine("2. Create a lecture and assign it to a faculty.");
+                Console.WriteLine("3. Create a student, add to a faculty, and assign lectures");
+                Console.WriteLine("4. Transfer student to another faculty");
+                Console.WriteLine("5. Display all students of the faculty");
+                Console.WriteLine("6. Display all lectures of the faculty");
+                Console.WriteLine("7. Display all lectures by student");
                 Console.WriteLine("0. Exit");
+
+                //Console.WriteLine("Student Information System");
+                //Console.WriteLine("1. Create a faculty and add students/lectures");
+                //Console.WriteLine("2. Add students/lectures to an existing faculty");
+                //Console.WriteLine("3. Create a lecture and assign it to a faculty");
+                //Console.WriteLine("4. Create a student, add to a faculty, and assign lectures");
+                //Console.WriteLine("5. Transfer student to another faculty");
+                //Console.WriteLine("6. Display all students of the faculty");
+                //Console.WriteLine("7. Display all lectures of the faculty");
+                //Console.WriteLine("8. Display all lectures by student");
+                //Console.WriteLine("0. Exit");
 
                 Console.Write("Enter your choice: ");
                 string choice = Console.ReadLine();
@@ -42,7 +56,21 @@ namespace DB_StudentsInformationSystem
                         break;
 
                     case "2":
-                        //Add Students Or Lectures To Faculty
+                        //Create And Assign Lectures to Faculty
+                        LectureMethods.CreateLectureAndAssignToFaculty();
+                        break;
+
+                    case "3":
+
+                        //Create Student And Assign To Faculty
+                        if (StudentMethods.CheckIfAnyFacultyExists())
+                        {
+                            StudentMethods.CreateStudent();                              // returns student object from user input
+                        }
+                        else Console.WriteLine("No faculties has been created yet! Please create a faculty and then assign students...");
+
+
+                        //Create a student add it to a faculty and assign lectures from faculty to the student
                         Console.WriteLine("Select Faculty add students or lectuers to: ");
                         FacultyMethods.Printer("2");
                         int facultyChoice = Int32.Parse(Console.ReadLine());
@@ -63,20 +91,10 @@ namespace DB_StudentsInformationSystem
                             FacultyMethods.Printer("7");
                         }
                         FacultyMethods.UpdateFaculty(facultyChoice, addChoice);
-
-                        break;
-
-                    case "3":
-                        //Create And Assign Lecture
                         break;
 
                     case "4":
-                        //Create Student And Assign To Faculty
-                        if (StudentMethods.CheckIfAnyFacultyExists())
-                        {
-                            StudentMethods.CreateStudent();                              // returns student object from user input
-                        }
-                        else Console.WriteLine("No faculties has been created yet! Please create a faculty and then assign students...");
+                        
                         break;
 
                     case "5":
@@ -216,7 +234,7 @@ namespace DB_StudentsInformationSystem
             Console.WriteLine($"Selected option: {choice}");
             if ((MenuOptions)choice == MenuOptions.CreateFaculty) FacultyMethods.CreateFaculty();
             if ((MenuOptions)choice == MenuOptions.AssignStudentsAndLectures) ;
-            if ((MenuOptions)choice == MenuOptions.CreateLecture) LectureMethods.CreateLecture();
+            //if ((MenuOptions)choice == MenuOptions.CreateLecture) LectureMethods.CreateLecture();
             if ((MenuOptions)choice == MenuOptions.CreateStudent) StudentMethods.CreateStudent();
             if ((MenuOptions)choice == MenuOptions.ReassignStudent) ;
             if ((MenuOptions)choice == MenuOptions.PrintStudentsOfFaculty) FacultyMethods.GetStudents();
@@ -232,9 +250,9 @@ namespace DB_StudentsInformationSystem
             dbContext.Database.EnsureDeleted();
             dbContext.Database.EnsureCreated();
 
-            var scienceFaculty = new Faculty { FacultyName = "Sciences" };
-            var languageFaculty = new Faculty { FacultyName = "Language" };
-            var engineerFaculty = new Faculty { FacultyName = "Engineering" };
+            var scienceFaculty = new Faculty { FacultyName = "Sciences", FacultyCode = "TEST01" };
+            var languageFaculty = new Faculty { FacultyName = "Language", FacultyCode = "TEST02" };
+            var engineerFaculty = new Faculty { FacultyName = "Engineering", FacultyCode = "TEST03" };
             dbContext.Faculty.AddRange(scienceFaculty, languageFaculty, engineerFaculty);
 
             Lecture lecture1 = new Lecture { LectureName = "Biologija" };
@@ -262,23 +280,21 @@ namespace DB_StudentsInformationSystem
             lectures3.Add(lecture7);
             lectures3.Add(lecture8);
 
-            var testStudent1 = new Student { StudentName = "Tomas", StudentSurname = "Babajus", Lectures = lectures1, Faculty = scienceFaculty };
-            var testStudent2 = new Student { StudentName = "Dinas", StudentSurname = "Karabinas", Lectures = lectures2, Faculty = languageFaculty };
-            var testStudent3 = new Student { StudentName = "Lukas", StudentSurname = "Bambukas", Lectures = lectures3, Faculty = engineerFaculty };
+            var testStudent1 = new Student { StudentName = "Tomas", StudentSurname = "Babajus"};
+            var testStudent2 = new Student { StudentName = "Dinas", StudentSurname = "Karabinas"};
+            var testStudent3 = new Student { StudentName = "Lukas", StudentSurname = "Bambukas"};
 
             dbContext.Student.AddRange(testStudent1, testStudent2, testStudent3);
 
 
-            dbContext.FacultyLectures.Add(new FacultyLecture { Faculty = scienceFaculty, Lecture = lecture1 });
-            dbContext.FacultyLectures.Add(new FacultyLecture { Faculty = scienceFaculty, Lecture = lecture8 });
+            dbContext.FacultyStudents.Add(new FacultyStudent { Faculty = scienceFaculty, Student = testStudent1 });
+            dbContext.FacultyStudents.Add(new FacultyStudent { Faculty = scienceFaculty, Student = testStudent2 });
 
-            dbContext.FacultyLectures.Add(new FacultyLecture { Faculty = engineerFaculty, Lecture = lecture2 });
-            dbContext.FacultyLectures.Add(new FacultyLecture { Faculty = engineerFaculty, Lecture = lecture3 });
-            dbContext.FacultyLectures.Add(new FacultyLecture { Faculty = engineerFaculty, Lecture = lecture5 });
+            dbContext.FacultyStudents.Add(new FacultyStudent { Faculty = engineerFaculty, Student = testStudent1 });
+            dbContext.FacultyStudents.Add(new FacultyStudent { Faculty = engineerFaculty, Student = testStudent2 });
 
-            dbContext.FacultyLectures.Add(new FacultyLecture { Faculty = languageFaculty, Lecture = lecture4 });
-            dbContext.FacultyLectures.Add(new FacultyLecture { Faculty = languageFaculty, Lecture = lecture6 });
-            dbContext.FacultyLectures.Add(new FacultyLecture { Faculty = languageFaculty, Lecture = lecture7 });
+            dbContext.FacultyStudents.Add(new FacultyStudent { Faculty = languageFaculty, Student = testStudent2 });
+            dbContext.FacultyStudents.Add(new FacultyStudent { Faculty = languageFaculty, Student = testStudent3 });
 
             dbContext.SaveChanges();
         }
@@ -300,11 +316,11 @@ namespace DB_StudentsInformationSystem
         public static void CreateFaculty()
         {
             Faculty faculty = GetFacultyInput();
-            if (IsFacultyInputValidated(faculty))                             // returns bool if student is valid
+            if (IsFacultyInputValidated(faculty))                             // returns bool if faculty is valid
             {
                 if (ConfirmCreatingFaculty(faculty))                          // returns bool on user choice of confirming correct info
                 {
-                    InsertFacultyInputToDB(faculty);                          // inserts student to DB
+                    InsertFacultyInputToDB(faculty);                          // inserts faculty to DB
                 }
             }
         }
@@ -383,12 +399,14 @@ namespace DB_StudentsInformationSystem
         public static List<Student> GetStudents()
         {
             var dbContext = new FacultyContext();
-            List<Student> students;
-            return students = dbContext.Student.ToList();
-
+            List<Student> students = dbContext.Student.ToList();      // Does not fetch Faculty info, returns Faculty null
+            //List<Student> students = dbContext.Student
+            //                        .Include(student => student.Faculty)
+            //                        .Include(student => student.Lectures).ToList();      // includes faculty  and Lectures info also, from FacultyId and  navigation property
+            return students;
         }
 
-        public static List<Faculty> GetFaculties()
+    public static List<Faculty> GetFaculties()
         {
             var dbContext = new FacultyContext();
             List<Faculty> faculties;
@@ -408,19 +426,19 @@ namespace DB_StudentsInformationSystem
                     if (students.Count > 0)
                     {
                         
-                        foreach (Student student in students)
-                        {
-                            if (student.Faculty.FacultyId != null)
-                            {
-                                Console.WriteLine($"{i}. Student: {student.StudentName} {student.StudentSurname} - {student.StudentNumber} - Faculty: {student.Faculty.FacultyId}");
-                            }
-                            else 
-                            {
+                        //foreach (Student student in students)
+                        //{
+                        //    if (student.Faculty.FacultyId != null)
+                        //    {
+                        //        Console.WriteLine($"{i}. Student: {student.StudentName} {student.StudentSurname} - {student.StudentNumber} - Faculty: {student.Faculty.FacultyId}");
+                        //    }
+                        //    else 
+                        //    {
                             
-                                Console.WriteLine($"{i}. Student: {student.StudentName} {student.StudentSurname} - {student.StudentNumber}");
-                            }
-                            i++;
-                        }
+                        //        Console.WriteLine($"{i}. Student: {student.StudentName} {student.StudentSurname} - {student.StudentNumber}");
+                        //    }
+                        //    i++;
+                        //}
                     }
                     else Console.WriteLine("There's no students currentlt in this faculty!");
                 }
@@ -461,9 +479,132 @@ namespace DB_StudentsInformationSystem
 
     public class LectureMethods
     {
-        public static void CreateLecture()
+        public static void CreateLectureAndAssignToFaculty()
         {
+            // Have to have maybe two methods, one for creating students to list without faculty from opt 4, and another to directly create and assign a faculty to it.
+            Lecture lectureToInput = GetLectureInput();                // returns student object from user input
 
+            if (ConfirmCreatingLecture(lectureToInput))                             // returns bool if student is valid
+            {
+                InsertLectureInputToDB(lectureToInput);                              // inserts student to DB
+                AssignLectureToFacultyAndUpdateDB(lectureToInput);
+            }
+
+        }
+
+        public static Lecture GetLectureInput()
+        {
+            //Here we'll get info required to create Lecture and validate the lecture time in the same method
+            Lecture lecture = new Lecture();
+
+            Console.WriteLine("Enter the name of the Lecture");
+            string lecName = Console.ReadLine();
+
+            // Get and validate lecture start time
+            DateTime lecStartTime;
+            do
+            {
+                Console.WriteLine($"At what time lecture {lecName} starts? (HH:mm)");
+                string startTimeInput = Console.ReadLine();
+
+                if (DateTime.TryParseExact(startTimeInput, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out lecStartTime))
+                {
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid time format. Please enter the time in HH:mm format.");
+                }
+            } while (true);
+
+            // Get and validate lecture end time
+            DateTime lecEndTime;
+            do
+            {
+                Console.WriteLine($"At what time lecture {lecName} ends? (HH:mm)");
+                string endTimeInput = Console.ReadLine();
+
+                if (DateTime.TryParseExact(endTimeInput, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out lecEndTime))
+                {
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid time format. Please enter the time in HH:mm format.");
+                }
+            } while (true);
+
+            lecture.LectureName = lecName;
+            lecture.LectureTimeStart = lecStartTime;
+            lecture.LectureTimeEnd = lecEndTime;
+
+            return lecture;
+        }
+
+        public static bool ConfirmCreatingLecture(Lecture lecture)
+        {
+            Console.WriteLine("Lecture will be created with such info: ");
+            Console.WriteLine($"Lecture Name: {lecture.LectureName}");
+            Console.WriteLine($"Lecture start time: {lecture.LectureTimeStart}");
+            Console.WriteLine($"Lecture end time: {lecture.LectureTimeEnd}");
+            Console.Write("Do you wish to continue? YES-[y]");
+
+            string choice = Console.ReadLine();
+
+            return choice == "y" ? true : false;
+        }
+
+        public static void InsertLectureInputToDB(Lecture lecture)
+        {
+            var dbContext = new FacultyContext();
+            dbContext.Lecture.Add(lecture);
+            dbContext.SaveChanges();
+        }
+
+        public static void AssignLectureToFacultyAndUpdateDB(Lecture lecture)
+        {
+            //List<Faculty> faculties = GetFaculties();
+            //PrintFaculties(faculties);
+
+            //Console.Write($"Enter the number of the faculty to assign lecture {lecture.LectureName}: ");
+            //if (int.TryParse(Console.ReadLine(), out int facultyNumber) && facultyNumber >= 1 && facultyNumber <= faculties.Count)
+            //{
+            //    // Subtract 1 to get the correct index in the list
+            //    Faculty selectedFaculty = faculties[facultyNumber - 1];
+            //    FacultyStudent belekas = new FacultyStudent { Faculty = selectedFaculty, Lecture = lecture };
+            //    // Assign the selected faculty to the student
+            //    var dbContext = new FacultyContext();
+            //    if (selectedFaculty != null && lecture != null)
+            //    {
+            //        // EF will automatically manage the FacultyLecture table
+            //        selectedFaculty.FacultyLectures.Add(belekas);
+
+            //        dbContext.SaveChanges();
+            //    }
+
+            //    Console.WriteLine($"Lecture {lecture.LectureName} assigned to {selectedFaculty.FacultyName} faculty.");
+            //}
+            //else
+            //{
+            //    Console.WriteLine("Invalid input. Please enter a valid faculty number.");
+            //}
+        }
+
+        public static void PrintFaculties(List<Faculty> faculties)
+        {
+            int i = 1;
+            foreach (var faculty in faculties)
+            {
+                Console.WriteLine($"{i}. Faculty: {faculty.FacultyName} - {faculty.FacultyCode}");
+                i++;
+            }
+        }
+
+        public static List<Faculty> GetFaculties()
+        {
+            var dbContext = new FacultyContext();
+            List<Faculty> faculties;
+            return faculties = dbContext.Faculty.ToList();
         }
     }
 
@@ -474,12 +615,6 @@ namespace DB_StudentsInformationSystem
             List<Faculty> faculties = GetFaculties();
 
             return faculties.Count > 0;
-        }
-        public static List<Faculty> GetFaculties()
-        {
-            var dbContext = new FacultyContext();
-            List < Faculty> faculties;
-            return faculties = dbContext.Faculty.ToList();
         }
         //public static void DeleteStudent()
         //{
@@ -498,6 +633,7 @@ namespace DB_StudentsInformationSystem
 
             if (IsStudentInputValidated(studentToInput))                             // returns bool if student is valid
             {
+                AssignStudentToFaculty(ref studentToInput);
                 InsertStudentInputToDB(studentToInput);                              // inserts student to DB
             }
         }
@@ -518,10 +654,10 @@ namespace DB_StudentsInformationSystem
             do
             {
 
-                var scienceFaculty = new Faculty { FacultyName = "EmptyFaculty", FacultyCode = "TEST01" };
-                var lecture2 = new Lecture { LectureName = "EmptyLecture" };
-                List<Lecture> lectures2 = new List<Lecture>();
-                lectures2.Add(lecture2);
+                //var scienceFaculty = new Faculty { FacultyName = "EmptyFaculty", FacultyCode = "TEST01" };
+                //var lecture2 = new Lecture { LectureName = "EmptyLecture" };
+                //List<Lecture> lectures2 = new List<Lecture>();
+                //lectures2.Add(lecture2);
 
                 student = new Student
                 {
@@ -529,8 +665,8 @@ namespace DB_StudentsInformationSystem
                     StudentSurname = studentSurname,
                     StudentEmail = studentEmail,
                     StudentNumber = studentNumber,
-                    Faculty = scienceFaculty,
-                    Lectures = lectures2
+                    //Faculty = scienceFaculty,
+                    //Lectures = lectures2
                 };
                 int missingValidation = ValidateStudentInput(student);                              // checks the student validation and returns approprirate int for valid student fields count
 
@@ -615,16 +751,56 @@ namespace DB_StudentsInformationSystem
 
         }
 
+        public static List<Faculty> GetFaculties()
+        {
+            var dbContext = new FacultyContext();
+            List < Faculty> faculties;
+            return faculties = dbContext.Faculty.ToList();
+        }
+        public static void PrintFaculties(List<Faculty> faculties)
+        {
+            int i = 1;
+            foreach (var faculty in faculties)
+            {
+                Console.WriteLine($"{i}. Faculty: {faculty.FacultyName} - {faculty.FacultyCode}");
+                i++;
+            }
+        }
+        public static void GetLectures()
+        {
+
+        }
+        public static void AssignStudentToFaculty(ref Student student)
+        {
+            List<Faculty> faculties = GetFaculties();
+            PrintFaculties(faculties);
+
+            Console.Write("Enter the number of the faculty: ");
+            if (int.TryParse(Console.ReadLine(), out int facultyNumber) && facultyNumber >= 1 && facultyNumber <= faculties.Count)
+            {
+                // Subtract 1 to get the correct index in the list
+                Faculty selectedFaculty = faculties[facultyNumber - 1];
+
+                // Assign the selected faculty to the student
+                var dbContext = new FacultyContext();
+                dbContext.Student.Add(student);     // First we have to add student to db separately and then update it's faculty because when adding student with faculty EF tries to create new faculty for us and it gets exception when trying to create new faculty with same facultyId when it already exists
+                //student.Faculty = selectedFaculty;
+                dbContext.SaveChanges();
+
+                // Save changes to the database
+
+
+                Console.WriteLine($"Student {student.StudentName} {student.StudentSurname} assigned to {selectedFaculty.FacultyName} faculty.");
+            }
+            else
+            {
+                Console.WriteLine("Invalid input. Please enter a valid faculty number.");
+            }
+        }
         public static void InsertStudentInputToDB(Student student)
         {
             var dbContext = new FacultyContext();
             dbContext.Student.Add(student);
-            dbContext.SaveChanges();
-        }
-
-        public static void GetLectures()
-        {
-
         }
     }
 }
