@@ -1,6 +1,7 @@
 ﻿using DB_StudentsInformationSystem.Database;
 using DB_StudentsInformationSystem.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 
@@ -21,15 +22,25 @@ namespace DB_StudentsInformationSystem
                 Console.Clear();
 
                 Console.WriteLine("Student Information System");
-                Console.WriteLine("1. Create a faculty and add students/lectures");
-                Console.WriteLine("2. Add students/lectures to an existing faculty");
-                Console.WriteLine("3. Create a lecture and assign it to a faculty");
-                Console.WriteLine("4. Create a student, add to a faculty, and assign lectures");
-                Console.WriteLine("5. Transfer student to another faculty");
-                Console.WriteLine("6. Display all students of the faculty");
-                Console.WriteLine("7. Display all lectures of the faculty");
-                Console.WriteLine("8. Display all lectures by student");
+                Console.WriteLine("1. Create a faculty.");
+                Console.WriteLine("2. Create a lecture and assign it to a faculty.");
+                Console.WriteLine("3. Create a student, add to a faculty, and assign lectures");
+                Console.WriteLine("4. Transfer student to another faculty");
+                Console.WriteLine("5. Display all students of the faculty");
+                Console.WriteLine("6. Display all lectures of the faculty");
+                Console.WriteLine("7. Display all lectures by student");
                 Console.WriteLine("0. Exit");
+
+                //Console.WriteLine("Student Information System");
+                //Console.WriteLine("1. Create a faculty and add students/lectures");
+                //Console.WriteLine("2. Add students/lectures to an existing faculty");
+                //Console.WriteLine("3. Create a lecture and assign it to a faculty");
+                //Console.WriteLine("4. Create a student, add to a faculty, and assign lectures");
+                //Console.WriteLine("5. Transfer student to another faculty");
+                //Console.WriteLine("6. Display all students of the faculty");
+                //Console.WriteLine("7. Display all lectures of the faculty");
+                //Console.WriteLine("8. Display all lectures by student");
+                //Console.WriteLine("0. Exit");
 
                 Console.Write("Enter your choice: ");
                 string choice = Console.ReadLine();
@@ -42,7 +53,20 @@ namespace DB_StudentsInformationSystem
                         break;
 
                     case "2":
-                        //Add Students Or Lectures To Faculty
+                        //Create And Assign Lectures to Faculty
+                        LectureMethods.CreateLectureAndAssignToFaculty();
+                        break;
+
+                    case "3":
+                        //Create Student And Assign To Faculty
+                        if (StudentMethods.CheckIfAnyFacultyExists())
+                        {
+                            StudentMethods.CreateStudent();                              // returns student object from user input
+                        }
+                        else Console.WriteLine("No faculties has been created yet! Please create a faculty and then assign students...");
+
+
+                        //Create a student add it to a faculty and assign lectures from faculty to the student
                         Console.WriteLine("Select Faculty add students or lectuers to: ");
                         FacultyMethods.Printer("2");
                         int facultyChoice = Int32.Parse(Console.ReadLine());
@@ -51,23 +75,19 @@ namespace DB_StudentsInformationSystem
                         Console.WriteLine("1. Students");
                         Console.WriteLine("2. Lectures");
                         int addChoice = Int32.Parse(Console.ReadLine());
-                        if(addChoice == 1)
+                        if (addChoice == 1)
                         {
                             Console.WriteLine("Select students which to add to selected faculty(list separated by ','): ");
                             FacultyMethods.Printer("6");
                             // finished here, need to get user input and filter selected students and update their faculty with selected one. Same for Lectures.
                         }
-                        else if(addChoice == 2)
+                        else if (addChoice == 2)
                         {
                             Console.WriteLine("Select lectures which to add to selected faculty(list separated by ','): ");
                             FacultyMethods.Printer("7");
                         }
                         FacultyMethods.UpdateFaculty(facultyChoice, addChoice);
 
-                        break;
-
-                    case "3":
-                        //Create And Assign Lecture
                         break;
 
                     case "4":
@@ -216,7 +236,7 @@ namespace DB_StudentsInformationSystem
             Console.WriteLine($"Selected option: {choice}");
             if ((MenuOptions)choice == MenuOptions.CreateFaculty) FacultyMethods.CreateFaculty();
             if ((MenuOptions)choice == MenuOptions.AssignStudentsAndLectures) ;
-            if ((MenuOptions)choice == MenuOptions.CreateLecture) LectureMethods.CreateLecture();
+            //if ((MenuOptions)choice == MenuOptions.CreateLecture) LectureMethods.CreateLecture();
             if ((MenuOptions)choice == MenuOptions.CreateStudent) StudentMethods.CreateStudent();
             if ((MenuOptions)choice == MenuOptions.ReassignStudent) ;
             if ((MenuOptions)choice == MenuOptions.PrintStudentsOfFaculty) FacultyMethods.GetStudents();
@@ -461,9 +481,132 @@ namespace DB_StudentsInformationSystem
 
     public class LectureMethods
     {
-        public static void CreateLecture()
+        public static void CreateLectureAndAssignToFaculty()
         {
+            // Have to have maybe two methods, one for creating students to list without faculty from opt 4, and another to directly create and assign a faculty to it.
+            Lecture lectureToInput = GetLectureInput();                // returns student object from user input
 
+            if (ConfirmCreatingLecture(lectureToInput))                             // returns bool if student is valid
+            {
+                InsertLectureInputToDB(lectureToInput);                              // inserts student to DB
+                AssignLectureToFacultyAndUpdateDB(lectureToInput);
+            }
+
+        }
+
+        public static Lecture GetLectureInput()
+        {
+            //Here we'll get info required to create Lecture and validate the lecture time in the same method
+            Lecture lecture = new Lecture();
+
+            Console.WriteLine("Enter the name of the Lecture");
+            string lecName = Console.ReadLine();
+
+            // Get and validate lecture start time
+            DateTime lecStartTime;
+            do
+            {
+                Console.WriteLine($"At what time lecture {lecName} starts? (HH:mm)");
+                string startTimeInput = Console.ReadLine();
+
+                if (DateTime.TryParseExact(startTimeInput, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out lecStartTime))
+                {
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid time format. Please enter the time in HH:mm format.");
+                }
+            } while (true);
+
+            // Get and validate lecture end time
+            DateTime lecEndTime;
+            do
+            {
+                Console.WriteLine($"At what time lecture {lecName} ends? (HH:mm)");
+                string endTimeInput = Console.ReadLine();
+
+                if (DateTime.TryParseExact(endTimeInput, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out lecEndTime))
+                {
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid time format. Please enter the time in HH:mm format.");
+                }
+            } while (true);
+
+            lecture.LectureName = lecName;
+            lecture.LectureTimeStart = lecStartTime;
+            lecture.LectureTimeEnd = lecEndTime;
+
+            return lecture;
+        }
+
+        public static bool ConfirmCreatingLecture(Lecture lecture)
+        {
+            Console.WriteLine("Lecture will be created with such info: ");
+            Console.WriteLine($"Lecture Name: {lecture.LectureName}");
+            Console.WriteLine($"Lecture start time: {lecture.LectureTimeStart}");
+            Console.WriteLine($"Lecture end time: {lecture.LectureTimeEnd}");
+            Console.Write("Do you wish to continue? YES-[y]");
+
+            string choice = Console.ReadLine();
+
+            return choice == "y" ? true : false;
+        }
+
+        public static void InsertLectureInputToDB(Lecture lecture)
+        {
+            var dbContext = new FacultyContext();
+            dbContext.Lecture.Add(lecture);
+            dbContext.SaveChanges();
+        }
+
+        public static void AssignLectureToFacultyAndUpdateDB(Lecture lecture)
+        {
+            List<Faculty> faculties = GetFaculties();
+            PrintFaculties(faculties);
+
+            Console.Write($"Enter the number of the faculty to assign lecture {lecture.LectureName}: ");
+            if (int.TryParse(Console.ReadLine(), out int facultyNumber) && facultyNumber >= 1 && facultyNumber <= faculties.Count)
+            {
+                // Subtract 1 to get the correct index in the list
+                Faculty selectedFaculty = faculties[facultyNumber - 1];
+                
+                // Assign the selected faculty to the student
+                var dbContext = new FacultyContext();
+                if (selectedFaculty != null && lecture != null)
+                {
+                    // EF will automatically manage the FacultyLecture table
+                    selectedFaculty.FacultyLectures.Add(new FacultyLecture { LectureId = lecture.LectureId});
+
+                    dbContext.SaveChanges();
+                }
+
+                Console.WriteLine($"Lecture {lecture.LectureName} assigned to {selectedFaculty.FacultyName} faculty.");
+            }
+            else
+            {
+                Console.WriteLine("Invalid input. Please enter a valid faculty number.");
+            }
+        }
+
+        public static void PrintFaculties(List<Faculty> faculties)
+        {
+            int i = 1;
+            foreach (var faculty in faculties)
+            {
+                Console.WriteLine($"{i}. Faculty: {faculty.FacultyName} - {faculty.FacultyCode}");
+                i++;
+            }
+        }
+
+        public static List<Faculty> GetFaculties()
+        {
+            var dbContext = new FacultyContext();
+            List<Faculty> faculties;
+            return faculties = dbContext.Faculty.ToList();
         }
     }
 

@@ -35,12 +35,12 @@ namespace DB_StudentsInformationSystem.Database
             modelBuilder.Entity<FacultyLecture>()
                 .HasOne(fc => fc.Faculty)
                 .WithMany(f => f.FacultyLectures)
-                .HasForeignKey(fc => fc.FacultyId);        // Sarysis su Faculty lentele
+                .HasForeignKey(fc => fc.FacultyId).OnDelete(DeleteBehavior.Restrict);        // Sarysis su Faculty lentele
 
             modelBuilder.Entity<FacultyLecture>()
                 .HasOne(lc => lc.Lecture)
                 .WithMany(l => l.FacultyLectures)
-                .HasForeignKey(lc => lc.LectureId);        // sarysis su Lecture lentele
+                .HasForeignKey(lc => lc.LectureId).OnDelete(DeleteBehavior.Restrict);        // sarysis su Lecture lentele
 
         }
 
