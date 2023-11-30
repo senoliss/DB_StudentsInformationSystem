@@ -71,6 +71,9 @@ namespace DB_StudentsInformationSystem
                         break;
 
                     case "4":
+
+                        StudentMethods.TransferStudentToAnotherFaculty();
+                        Console.ReadKey();
                         //Create Student And Assign To Faculty
                         //if (StudentMethods.CheckIfAnyFacultyExists())
                         //{
@@ -709,11 +712,11 @@ namespace DB_StudentsInformationSystem
 
             if (IsStudentInputValidated(studentToInput))                             // returns bool if student is valid
             {
-                UpdateStudentFaculty(ref studentToInput);
+                AddStudentToFaculty(ref studentToInput);
                 //InsertStudentInputToDB(studentToInput);     // not needed since we add, update and save changes in UpdateStudentFaculty() method
             }
         }
-        public static void UpdateStudentFaculty(ref Student student)
+        public static void AddStudentToFaculty(ref Student student)
         {
             List<Faculty> faculties = GetFaculties();
             PrintFaculties(faculties);
@@ -746,6 +749,73 @@ namespace DB_StudentsInformationSystem
             }
         }
 
+        public static void UpdateStudentFaculty(ref Student student)
+        {
+            List<Faculty> faculties = GetFaculties();
+            PrintFaculties(faculties);
+            var dbContext = new FacultyContext();
+            var studentToUpdate = dbContext.Student.Find(student.StudentId);        // Finds the new student object without fetching faculty by existing student object studentId
+
+            Console.Write($"Enter the number of the faculty to assign student {student.StudentName} {student.StudentSurname} to: ");
+            if (int.TryParse(Console.ReadLine(), out int facultyNumber) && facultyNumber >= 1 && facultyNumber <= faculties.Count)
+            {
+                // Subtract 1 to get the correct index in the list
+                Faculty selectedFaculty = faculties[facultyNumber - 1];
+
+                // Assign the selected faculty to the student
+                if (selectedFaculty != null && student != null)
+                {
+                    // EF will automatically manage the FacultyLecture table
+                    //selectedFaculty.FacultyLectures.Add(new FacultyLecture { FacultyId = selectedFaculty.FacultyId, LectureId = lecture.LectureId });
+                    //selectedFaculty.FacultyLectures.Add(new FacultyLecture { Faculty = selectedFaculty, Lecture = lecture});
+                    //dbContext.FacultyLectures.Add(new FacultyLecture { FacultyId = selectedFaculty.FacultyId, LectureId = lecture.LectureId });
+                    //dbContext.Student.Add(student);
+                    //student.Faculty.FacultyId = selectedFaculty.FacultyId;
+                    studentToUpdate.Faculty = selectedFaculty;      // Updates existing student in db with overrwritend faculty data
+                    dbContext.SaveChanges();
+                }
+
+                Console.WriteLine($"Student {student.StudentName} {student.StudentSurname} assigned to {selectedFaculty.FacultyName} faculty.");
+            }
+            else
+            {
+                Console.WriteLine("Invalid input. Please enter a valid faculty number.");
+            }
+        }
+
+        public static void TransferStudentToAnotherFaculty()
+        {
+            List<Student> students = FacultyMethods.GetStudents();
+            Console.WriteLine("Select student to change faculties: ");
+            FacultyMethods.PrintStudents(students);
+
+            if (!(int.TryParse(Console.ReadLine(), out int studentId) && studentId >= 1 && studentId <= students.Count))
+            {
+                do
+                {
+                    Console.WriteLine("Enter the number of the faculty: ");
+                } while (int.TryParse(Console.ReadLine(), out studentId) && studentId >= 1 && studentId <= students.Count);
+            }
+
+            Student selectedStudent = students[studentId - 1];
+            Console.WriteLine($"Selected student: {selectedStudent.StudentName} {selectedStudent.StudentSurname} is in faculty: '{selectedStudent.Faculty.FacultyName}'");
+            Console.WriteLine("Select a faculty to transfer student to: ");
+
+            UpdateStudentFaculty(ref selectedStudent);
+
+            //List<Faculty> faculties = FacultyMethods.GetFaculties();
+            //PrintFaculties(faculties);
+
+            //Console.Write("Enter the number of the faculty: ");
+            //if (!(int.TryParse(Console.ReadLine(), out int facultyId) && facultyId >= 1 && facultyId <= faculties.Count))
+            //{
+            //    do
+            //    {
+            //        Console.WriteLine("Enter the number of the faculty: ");
+            //    } while (int.TryParse(Console.ReadLine(), out facultyId) && facultyId >= 1 && facultyId <= faculties.Count);
+            //}
+
+        }
         public static void PrintFaculties(List<Faculty> faculties)
         {
             int i = 1;
