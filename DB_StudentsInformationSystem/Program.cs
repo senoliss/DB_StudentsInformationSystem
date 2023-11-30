@@ -50,11 +50,13 @@ namespace DB_StudentsInformationSystem
                     case "1":
                         //Create Faculty
                         FacultyMethods.CreateFaculty();
+                        Console.ReadKey();
                         break;
 
                     case "2":
                         //Create And Assign Lectures to Faculty
                         LectureMethods.CreateLectureAndAssignToFaculty();
+                        Console.ReadKey();
                         break;
 
                     case "3":
@@ -65,6 +67,7 @@ namespace DB_StudentsInformationSystem
                             StudentMethods.CreateStudentAndAssignFaculty();                              // returns student object from user input
                         }
                         else Console.WriteLine("No faculties has been created yet! Please create a faculty and then assign students...");
+                        Console.ReadKey();
                         break;
 
                     case "4":
@@ -74,6 +77,8 @@ namespace DB_StudentsInformationSystem
                         //    StudentMethods.CreateStudent();                              // returns student object from user input
                         //}
                         //else Console.WriteLine("No faculties has been created yet! Please create a faculty and then assign students...");
+
+
                         break;
 
                     //case "5":
@@ -94,7 +99,9 @@ namespace DB_StudentsInformationSystem
                         break;
 
                     case "7":
+                        FacultyMethods.Printer("7");
                         //Display All Lectures By Student
+                        Console.ReadKey();
                         break;
 
                     case "0":
@@ -297,11 +304,11 @@ namespace DB_StudentsInformationSystem
         public static void CreateFaculty()
         {
             Faculty faculty = GetFacultyInput();
-            if (IsFacultyInputValidated(faculty))                             // returns bool if student is valid
+            if (IsFacultyInputValidated(faculty))                             // returns bool if faculty is valid
             {
                 if (ConfirmCreatingFaculty(faculty))                          // returns bool on user choice of confirming correct info
                 {
-                    InsertFacultyInputToDB(faculty);                          // inserts student to DB
+                    InsertFacultyInputToDB(faculty);                          // inserts faculty to DB
                 }
             }
         }
@@ -389,7 +396,7 @@ namespace DB_StudentsInformationSystem
         {
             var dbContext = new FacultyContext();
             List<Student> students;
-            return students = dbContext.Student.ToList();
+            return students = dbContext.Student.Include(s => s.Faculty).ToList();
 
         }
         public static List<Student> GetStudentsByFaculty(int facultyId)
@@ -397,7 +404,7 @@ namespace DB_StudentsInformationSystem
             var dbContext = new FacultyContext();
             List<Student> students;
             //return lectures = dbContext.Lecture.Where(s => s.LectureId == (dbContext.FacultyLectures.Select(l => l.FacultyId == 2)).ToList();
-            return students = dbContext.Student.Where(fl => fl.Faculty.FacultyId == facultyId).ToList();//.Select(fl => fl.Lecture).ToList();
+            return students = dbContext.Student.Where(fl => fl.Faculty.FacultyId == facultyId).Include(s => s.Faculty).ToList();//.Select(fl => fl.Lecture).ToList();
         }
 
         public static List<Faculty> GetFaculties()
@@ -472,6 +479,39 @@ namespace DB_StudentsInformationSystem
                     }
                     else Console.WriteLine("There's no lectures currently in this faculty!");
                 }
+                else if (choice == "7")
+                {
+                    List<Student> students = GetStudents();
+                    PrintStudents(students);
+                    Console.Write("Enter the number of the student: ");
+                    if (!(int.TryParse(Console.ReadLine(), out int studentId) && studentId >= 1 && studentId <= students.Count))
+                    {
+                        do
+                        {
+                            Console.WriteLine("Enter the number of the faculty: ");
+                        } while (int.TryParse(Console.ReadLine(), out studentId) && studentId >= 1 && studentId <= students.Count);
+                    }
+
+                    Student selectedStudent = students[studentId - 1];
+
+                    try
+                    {
+                        List<Lecture> lectures = GetLecturesByFaculty(selectedStudent.Faculty.FacultyId);
+                        if (lectures.Count > 0)
+                        {
+                            foreach (Lecture lecture in lectures)
+                            {
+                                Console.WriteLine($"{i}. Lecture: {lecture.LectureName} - starts: {lecture.LectureTimeStart} / ends: {lecture.LectureTimeEnd} | Faculty: {selectedStudent.Faculty.FacultyName}");
+                                i++;
+                            }
+                        }
+                        else Console.WriteLine($"Although student is appointed to '{selectedStudent.Faculty.FacultyName}' faculty... \nThere's no lectures currently in this faculty!");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Although student is appointed to {selectedStudent.Faculty.FacultyName} faculty... \nThere's no lectures currently in this faculty!");
+                    }
+                }
             }
         }
 
@@ -481,6 +521,26 @@ namespace DB_StudentsInformationSystem
             foreach (var faculty in faculties)
             {
                 Console.WriteLine($"{i}. Faculty: {faculty.FacultyName} - {faculty.FacultyCode}");
+                i++;
+            }
+        }
+
+        public static void PrintLectures(List<Lecture> lectures)
+        {
+            int i = 1;
+            foreach (var lecture in lectures)
+            {
+                Console.WriteLine($"{i}. Lecture: {lecture.LectureName}");
+                i++;
+            }
+        }
+
+        public static void PrintStudents(List<Student> students)
+        {
+            int i = 1;
+            foreach (var student in students)
+            {
+                Console.WriteLine($"{i}. Student: {student.StudentName} {student.StudentName}");
                 i++;
             }
         }
