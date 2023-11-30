@@ -61,6 +61,7 @@ namespace DB_StudentsInformationSystem
                         //Create Student And Assign To Faculty
                         if (StudentMethods.CheckIfAnyFacultyExists())
                         {
+                            //ahve to check also if faculty has lessons assigned in FacultyLectures table, otherwie we cannot add student to faculty which has no lessons in it yeet
                             StudentMethods.CreateStudentAndAssignFaculty();                              // returns student object from user input
                         }
                         else Console.WriteLine("No faculties has been created yet! Please create a faculty and then assign students...");
@@ -648,17 +649,14 @@ namespace DB_StudentsInformationSystem
 
             if (IsStudentInputValidated(studentToInput))                             // returns bool if student is valid
             {
-                InsertStudentInputToDB(studentToInput);                              // inserts student to DB
+                UpdateStudentFaculty(ref studentToInput);
+                //InsertStudentInputToDB(studentToInput);     // not needed since we add, update and save changes in UpdateStudentFaculty() method
             }
-            UpdateStudentFaculty(studentToInput);
         }
-        public static void UpdateStudentFaculty(Student student)
+        public static void UpdateStudentFaculty(ref Student student)
         {
             List<Faculty> faculties = GetFaculties();
-
-            Console.WriteLine("Select Faculty add students or lectuers to: ");
-            FacultyMethods.Printer("2");
-            int facultyChoice = Int32.Parse(Console.ReadLine());
+            PrintFaculties(faculties);
 
 
             Console.Write($"Enter the number of the faculty to assign student {student.StudentName} {student.StudentSurname} to: ");
@@ -674,7 +672,9 @@ namespace DB_StudentsInformationSystem
                     // EF will automatically manage the FacultyLecture table
                     //selectedFaculty.FacultyLectures.Add(new FacultyLecture { FacultyId = selectedFaculty.FacultyId, LectureId = lecture.LectureId });
                     //selectedFaculty.FacultyLectures.Add(new FacultyLecture { Faculty = selectedFaculty, Lecture = lecture});
-                    dbContext.FacultyLectures.Add(new FacultyLecture { FacultyId = selectedFaculty.FacultyId, LectureId = lecture.LectureId });
+                    //dbContext.FacultyLectures.Add(new FacultyLecture { FacultyId = selectedFaculty.FacultyId, LectureId = lecture.LectureId });
+                    dbContext.Student.Add(student);
+                    student.Faculty = selectedFaculty;
                     dbContext.SaveChanges();
                 }
 
@@ -684,7 +684,6 @@ namespace DB_StudentsInformationSystem
             {
                 Console.WriteLine("Invalid input. Please enter a valid faculty number.");
             }
-
         }
 
         public static void PrintFaculties(List<Faculty> faculties)
@@ -713,10 +712,10 @@ namespace DB_StudentsInformationSystem
             do
             {
 
-                var scienceFaculty = new Faculty { FacultyName = "EmptyFaculty", FacultyCode = "TEST01" };
-                var lecture2 = new Lecture { LectureName = "EmptyLecture" };
-                List<Lecture> lectures2 = new List<Lecture>();
-                lectures2.Add(lecture2);
+                //var scienceFaculty = new Faculty { FacultyName = "EmptyFaculty", FacultyCode = "TEST01" };
+                //var lecture2 = new Lecture { LectureName = "EmptyLecture" };
+                //List<Lecture> lectures2 = new List<Lecture>();
+                //lectures2.Add(lecture2);
 
                 student = new Student
                 {
@@ -724,8 +723,8 @@ namespace DB_StudentsInformationSystem
                     StudentSurname = studentSurname,
                     StudentEmail = studentEmail,
                     StudentNumber = studentNumber,
-                    Faculty = scienceFaculty,
-                    Lectures = lectures2
+                    //Faculty = scienceFaculty,
+                    //Lectures = lectures2
                 };
                 int missingValidation = ValidateStudentInput(student);                              // checks the student validation and returns approprirate int for valid student fields count
 
