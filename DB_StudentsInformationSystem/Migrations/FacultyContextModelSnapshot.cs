@@ -40,7 +40,7 @@ namespace DB_StudentsInformationSystem.Migrations
 
                     b.HasKey("FacultyId");
 
-                    b.ToTable("Faculty");
+                    b.ToTable("Faculties");
                 });
 
             modelBuilder.Entity("DB_StudentsInformationSystem.Database.Models.FacultyLecture", b =>
@@ -76,14 +76,9 @@ namespace DB_StudentsInformationSystem.Migrations
                     b.Property<DateTime>("LectureTimeStart")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("StudentId")
-                        .HasColumnType("int");
-
                     b.HasKey("LectureId");
 
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("Lecture");
+                    b.ToTable("Lectures");
                 });
 
             modelBuilder.Entity("DB_StudentsInformationSystem.Database.Models.Student", b =>
@@ -115,7 +110,22 @@ namespace DB_StudentsInformationSystem.Migrations
 
                     b.HasIndex("FacultyId");
 
-                    b.ToTable("Student");
+                    b.ToTable("Students");
+                });
+
+            modelBuilder.Entity("DB_StudentsInformationSystem.Database.Models.StudentLecture", b =>
+                {
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LectureId")
+                        .HasColumnType("int");
+
+                    b.HasKey("StudentId", "LectureId");
+
+                    b.HasIndex("LectureId");
+
+                    b.ToTable("StudentLectures");
                 });
 
             modelBuilder.Entity("DB_StudentsInformationSystem.Database.Models.FacultyLecture", b =>
@@ -123,25 +133,18 @@ namespace DB_StudentsInformationSystem.Migrations
                     b.HasOne("DB_StudentsInformationSystem.Database.Models.Faculty", "Faculty")
                         .WithMany("FacultyLectures")
                         .HasForeignKey("FacultyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DB_StudentsInformationSystem.Database.Models.Lecture", "Lecture")
                         .WithMany("FacultyLectures")
                         .HasForeignKey("LectureId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Faculty");
 
                     b.Navigation("Lecture");
-                });
-
-            modelBuilder.Entity("DB_StudentsInformationSystem.Database.Models.Lecture", b =>
-                {
-                    b.HasOne("DB_StudentsInformationSystem.Database.Models.Student", null)
-                        .WithMany("Lectures")
-                        .HasForeignKey("StudentId");
                 });
 
             modelBuilder.Entity("DB_StudentsInformationSystem.Database.Models.Student", b =>
@@ -155,6 +158,25 @@ namespace DB_StudentsInformationSystem.Migrations
                     b.Navigation("Faculty");
                 });
 
+            modelBuilder.Entity("DB_StudentsInformationSystem.Database.Models.StudentLecture", b =>
+                {
+                    b.HasOne("DB_StudentsInformationSystem.Database.Models.Lecture", "Lecture")
+                        .WithMany("StudentLectures")
+                        .HasForeignKey("LectureId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DB_StudentsInformationSystem.Database.Models.Student", "Student")
+                        .WithMany("StudentLectures")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Lecture");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("DB_StudentsInformationSystem.Database.Models.Faculty", b =>
                 {
                     b.Navigation("FacultyLectures");
@@ -165,11 +187,13 @@ namespace DB_StudentsInformationSystem.Migrations
             modelBuilder.Entity("DB_StudentsInformationSystem.Database.Models.Lecture", b =>
                 {
                     b.Navigation("FacultyLectures");
+
+                    b.Navigation("StudentLectures");
                 });
 
             modelBuilder.Entity("DB_StudentsInformationSystem.Database.Models.Student", b =>
                 {
-                    b.Navigation("Lectures");
+                    b.Navigation("StudentLectures");
                 });
 #pragma warning restore 612, 618
         }

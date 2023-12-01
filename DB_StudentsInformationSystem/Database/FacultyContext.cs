@@ -17,17 +17,18 @@ namespace DB_StudentsInformationSystem.Database
         {
         }
 
-        public DbSet<Faculty> Faculty { get; set; }
-		public DbSet<Lecture> Lecture { get; set; }
-		public DbSet<Student> Student { get; set; }
+        public DbSet<Faculty> Faculties { get; set; }
+		public DbSet<Lecture> Lectures { get; set; }
+		public DbSet<Student> Students { get; set; }
+        public DbSet<StudentLecture> StudentLectures { get; set; }
         public DbSet<FacultyLecture> FacultyLectures { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //base.OnModelCreating(modelBuilder); galima istrinti
 
             // universali sintaxe norint uztikrinti sujungima tarp lenteliu
-            // cia mes konfiguruojame sarysi su many to many
+            
+            // cia mes konfiguruojame sarysi many to many sujungdami Faculty ir Lecture lenteles
 
             modelBuilder.Entity<FacultyLecture>()
                 .HasKey(f => new { f.FacultyId, f.LectureId });        // du pirminiai raktai nurodomi skirti sujungti sarysi daug su daug tarp Lecture ir Faculty klasiu / lejnteliu
@@ -41,12 +42,27 @@ namespace DB_StudentsInformationSystem.Database
                 .HasOne(lc => lc.Lecture)
                 .WithMany(l => l.FacultyLectures)
                 .HasForeignKey(lc => lc.LectureId).OnDelete(DeleteBehavior.Restrict);        // sarysis su Lecture lentele
+            
+            // cia mes konfiguruojame sarysi many to many sujungdami Student ir Lecture lenteles
+
+            modelBuilder.Entity<StudentLecture>()
+                .HasKey(f => new { f.StudentId, f.LectureId });        // du pirminiai raktai nurodomi skirti sujungti sarysi daug su daug tarp Lecture ir Faculty klasiu / lejnteliu
+
+            modelBuilder.Entity<StudentLecture>()
+                .HasOne(fc => fc.Student)
+                .WithMany(f => f.StudentLectures)
+                .HasForeignKey(fc => fc.StudentId).OnDelete(DeleteBehavior.Restrict);        // Sarysis su Student lentele
+
+            modelBuilder.Entity<StudentLecture>()
+                .HasOne(lc => lc.Lecture)
+                .WithMany(l => l.StudentLectures)
+                .HasForeignKey(lc => lc.LectureId).OnDelete(DeleteBehavior.Restrict);        // sarysis su Lecture lentele
 
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer($"Server=(localdb)\\mssqllocaldb;Database=DB_SIS;Trusted_Connection=True;");
+            optionsBuilder.UseSqlServer($"Server=(localdb)\\mssqllocaldb;Database=DB_SIS2;Trusted_Connection=True;");
         }
     }
 }

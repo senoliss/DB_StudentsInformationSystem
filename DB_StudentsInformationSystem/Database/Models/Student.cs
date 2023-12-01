@@ -10,17 +10,17 @@ namespace DB_StudentsInformationSystem.Database.Models
 {
 	public class Student
 	{
-        [Key]                                               // Primary Key Attribute
-        public int StudentId { get; set; }                  // Primary Key Property 'Navigational property'
+        [Key]                                                           // Primary Key Attribute
+        public int StudentId { get; set; }                              // Primary Key Property 'Navigational property'
         // butu gerai tureti ForeignKey i FacultyId nusirodyt i Faculty
-        //[ForeignKey("Faculty")]
-        //public int FacultyId { get; set; }
+        [ForeignKey("Faculty")]
+        public int FacultyId { get; set; }
         public string StudentName { get; set; }
         public string StudentSurname { get; set; }
         public string? StudentEmail { get; set; }
         public int StudentNumber { get; set; }
-        public List<Lecture> Lectures { get; set; }         // Composition to Lecture table 'Has many lectures'
-        public Faculty Faculty { get; set; }                // Composition to Faculty table 'Has one faculty'
+        public List<StudentLecture> StudentLectures { get; set; }       // Composition to Lecture table 'Has many lectures'
+        public Faculty Faculty { get; set; }                            // Composition to Faculty table 'Has one faculty'
 
     }
 }
