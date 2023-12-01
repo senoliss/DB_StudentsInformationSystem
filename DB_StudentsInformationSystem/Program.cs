@@ -122,14 +122,13 @@ namespace DB_StudentsInformationSystem
         public enum MenuOptions
         {
             CreateFaculty = 1,
-            AssignStudentsAndLectures = 2,
-            CreateLecture = 3,
-            CreateStudent = 4,
-            ReassignStudent = 5,
-            PrintStudentsOfFaculty = 6,
-            PrintLecturesOfFaculty = 7,
-            PrintLecturesOfStudent = 8,
-            Exit = 9
+            CreateLectureAndAssignToFaculty = 2,
+            CreateStudentAssignToFacultyAndAddLectures = 3,
+            ReassignStudent = 4,
+            PrintStudentsOfFaculty = 5,
+            PrintLecturesOfFaculty = 6,
+            PrintLecturesOfStudent = 7,
+            Exit = 8
         }
 
         static void DrawMenu(string[] options, int selectedIndex)
@@ -190,9 +189,10 @@ namespace DB_StudentsInformationSystem
         }
         static void NavigateMenu()
         {
-            string[] menuItems = { "1. Create Faculty", "2. Assign Students And Lectures to Faculty", "3. Create Lecture",
-                "4. Create Student", "5. Reassign Student", "6. Print Students Of Faculty", "7. Print Lectures Of Faculty",
-                "8. Print Lectures Of Student", "9. Exit" };
+            string[] menuItems = { "1. Create Faculty", "2. Create Lecture and assign it to Faculty", 
+                "3. Create Student assign it to a Faculty and add Lectures", "4. Reassign Student",
+                "5. Print Students Of Faculty", "6. Print Lectures of Faculty", "7. Print Lectures of Student",
+                "8. Exit" };
 
             int selectedIndex = 0;
 
@@ -222,13 +222,12 @@ namespace DB_StudentsInformationSystem
             // Add logic to handle the selected menu item.
             Console.WriteLine($"Selected option: {choice}");
             if ((MenuOptions)choice == MenuOptions.CreateFaculty) FacultyMethods.CreateFaculty();
-            if ((MenuOptions)choice == MenuOptions.AssignStudentsAndLectures) ;
-            //if ((MenuOptions)choice == MenuOptions.CreateLecture) LectureMethods.CreateLecture();
-            //if ((MenuOptions)choice == MenuOptions.CreateStudent) StudentMethods.CreateStudent();
-            if ((MenuOptions)choice == MenuOptions.ReassignStudent) ;
-            if ((MenuOptions)choice == MenuOptions.PrintStudentsOfFaculty) FacultyMethods.GetStudents();
-            if ((MenuOptions)choice == MenuOptions.PrintLecturesOfFaculty) FacultyMethods.GetLectures();
-            if ((MenuOptions)choice == MenuOptions.PrintLecturesOfStudent) StudentMethods.GetLectures();
+            if ((MenuOptions)choice == MenuOptions.CreateLectureAndAssignToFaculty) LectureMethods.CreateLectureAndAssignToFaculty();
+            if ((MenuOptions)choice == MenuOptions.CreateStudentAssignToFacultyAndAddLectures) StudentMethods.CreateStudentAndAssignFaculty();
+            if ((MenuOptions)choice == MenuOptions.ReassignStudent) StudentMethods.TransferStudentToAnotherFaculty();
+            if ((MenuOptions)choice == MenuOptions.PrintStudentsOfFaculty) FacultyMethods.Printer("5");
+            if ((MenuOptions)choice == MenuOptions.PrintLecturesOfFaculty) FacultyMethods.Printer("6");
+            if ((MenuOptions)choice == MenuOptions.PrintLecturesOfStudent) FacultyMethods.Printer("7");
             if ((MenuOptions)choice == MenuOptions.Exit) Environment.Exit(0);
         }
         #endregion
@@ -736,8 +735,8 @@ namespace DB_StudentsInformationSystem
                     //selectedFaculty.FacultyLectures.Add(new FacultyLecture { FacultyId = selectedFaculty.FacultyId, LectureId = lecture.LectureId });
                     //selectedFaculty.FacultyLectures.Add(new FacultyLecture { Faculty = selectedFaculty, Lecture = lecture});
                     //dbContext.FacultyLectures.Add(new FacultyLecture { FacultyId = selectedFaculty.FacultyId, LectureId = lecture.LectureId });
-                    dbContext.Student.Add(student);
                     student.Faculty = selectedFaculty;
+                    dbContext.Student.Add(student);
                     dbContext.SaveChanges();
                 }
 
@@ -770,7 +769,7 @@ namespace DB_StudentsInformationSystem
                     //selectedFaculty.FacultyLectures.Add(new FacultyLecture { Faculty = selectedFaculty, Lecture = lecture});
                     //dbContext.FacultyLectures.Add(new FacultyLecture { FacultyId = selectedFaculty.FacultyId, LectureId = lecture.LectureId });
                     //dbContext.Student.Add(student);
-                    //student.Faculty.FacultyId = selectedFaculty.FacultyId;
+                    //student.FacultyId = selectedFaculty.FacultyId;
                     studentToUpdate.Faculty = selectedFaculty;      // Updates existing student in db with overrwritend faculty data
                     dbContext.SaveChanges();
                 }

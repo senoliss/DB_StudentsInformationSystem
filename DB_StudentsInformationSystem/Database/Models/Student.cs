@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,9 @@ namespace DB_StudentsInformationSystem.Database.Models
 	{
         [Key]                                               // Primary Key Attribute
         public int StudentId { get; set; }                  // Primary Key Property 'Navigational property'
+        // butu gerai tureti ForeignKey i FacultyId nusirodyt i Faculty
+        //[ForeignKey("Faculty")]
+        //public int FacultyId { get; set; }
         public string StudentName { get; set; }
         public string StudentSurname { get; set; }
         public string? StudentEmail { get; set; }
