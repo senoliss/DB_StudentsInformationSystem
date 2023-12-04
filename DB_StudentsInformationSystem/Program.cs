@@ -283,5 +283,7 @@ namespace DB_StudentsInformationSystem
         //    dbContext.SaveChanges();
         //}
         #endregion
+
+        // visas validacijas iskelti i atskiras klases is db methods
     }
 }

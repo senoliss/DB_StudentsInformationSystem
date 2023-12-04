@@ -20,6 +20,7 @@ namespace DB_StudentsInformationSystem
         public void CreateFaculty()
         {
             Faculty faculty = GetFacultyInput();
+            
             if (IsFacultyInputValidated(faculty))                             // returns bool if faculty is valid
             {
                 if (ConfirmCreatingFaculty(faculty))                          // returns bool on user choice of confirming correct info
@@ -62,6 +63,7 @@ namespace DB_StudentsInformationSystem
                 return 2;
             }
             return 0;
+            // magic numbers negali buti, validatoriai turi grazinti konkrecias vertes true false
         }
         // Here we'll Validate info that we got from input to create Departament
         public bool IsFacultyInputValidated(Faculty faculty)
